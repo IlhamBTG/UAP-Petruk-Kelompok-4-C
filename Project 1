@@ -61,6 +61,13 @@ int main() {
     string username;
 
     while (true) {
+        cout << " .oooooo.                                                 " << endl;
+        cout <<" d8P'  `Y8b                                                     " << endl;
+        cout <<"888          oooo   ooo. .oo.    ooooo.   ooo. .oo.  .oo.    .oooo.  " << endl;
+        cout <<"888          `888  `888P'Y88b  d88' `88b `888P'Y88bP'Y88b  `P  )88b " << endl;
+        cout <<"888           888   888   888  888ooo888  888   888   888   .oP'888 " << endl;
+        cout <<"`88b    ooo   888   888   888  888    .o  888   888   888  d8(  888 " << endl;
+        cout <<" `Y8bood8P'  o888o o888o o888o `Y8bod8P' o888o o888o o888o `Y888''8o" << endl << endl;
         cout << "1. Registrasi\n2. Login\n3. Tambah Film (Admin)\n4. Daftar Film\n5. Pesan Tiket\n6. Keluar\n";
         cout << "Masukkan pilihan Anda: ";
         cin >> choice;
@@ -101,7 +108,23 @@ int main() {
                 for (auto &booking : bookings) {
                     delete booking;
                 } 
-                cout << "Terima Kasih" << endl;
+                cout << "ooooooooooooo                                                     " << endl;            
+                cout << "8'   888   `8                                                     " << endl;
+                cout << "     888       .ooooo.  oooo d8b  oooo  ooo. .oo.  .oo.    .oooo.  " << endl;
+                cout << "     888      d88' `88b `888''8P `888  `888P'Y88bP'Y88b  `P  )88b " << endl;
+                cout << "     888      888ooo888  888      888   888   888   888   .oP'888 " << endl;
+                cout << "     888      888    .o  888      888   888   888   888  d8(  888 " << endl;
+                cout << "    o888o     `Y8bod8P' d888b    o888o o888o o888o o888o `Y888'8o" << endl;
+                cout << "                                                                  " << endl;
+                cout << "                                                                  " << endl;
+                cout << "                                                                  " << endl;
+                cout << "oooo    oooo                           oooo                       " << endl;
+                cout << "`888   .8P'                            `888                       " << endl;
+                cout << " 888  d8'     .oooo.    .oooo.o  oooo   888 .oo.                  " << endl;
+                cout << " 88888[      `P  )88b  d88(  '8  `888   888P'Y88b                 " << endl;
+                cout << " 888`88b.     .oP'888  `'Y88b.    888   888   888                 " << endl;
+                cout << " 888  `88b.  d8(  888  o.  )88b   888   888   888                 " << endl;
+                cout << "o888o  o888o `Y888'8o  8''888P'  o888o o888o o888o                " << endl;
                 exit(0);
             default:
                 cout << "Pilihan tidak valid!\n";
