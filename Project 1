@@ -1,0 +1,271 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <cstdlib>
+#include <ctime>
+#include <algorithm>
+
+using namespace std;
+
+class User {
+public:
+    string username;
+    string password;
+
+    User(string u, string p) : username(u), password(p) {}
+};
+
+class Movie {
+public:
+    string title;
+    string schedule;
+    vector<string> seats;
+
+    Movie(string t, string s) : title(t), schedule(s) {
+        for (int i = 1; i <= 100; ++i) {
+            seats.push_back("Kursi" + to_string(i));
+        }
+    }
+};
+
+class Booking {
+public:
+    string username;
+    string movieTitle;
+    string seat;
+
+    Booking(string u, string m, string s) : username(u), movieTitle(m), seat(s) {}
+};
+
+vector<User*> users;
+vector<Movie*> movies;
+vector<Booking*> bookings;
+
+void saveData();
+void loadData();
+bool registerUser();
+bool loginUser(string &username);
+void addMovie();
+void viewMovies();
+void bookTicket(const string &username);
+void generateBarcode(const string &ticketInfo);
+User* findUser(const string& username);
+Movie* findMovie(const string& title);
+
+int main() {
+    srand(time(0));
+    loadData();
+
+    int choice;
+    string username;
+
+    while (true) {
+        cout << "1. Registrasi\n2. Login\n3. Tambah Film (Admin)\n4. Daftar Film\n5. Pesan Tiket\n6. Keluar\n";
+        cout << "Masukkan pilihan Anda: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                registerUser();
+                break;
+            case 2:
+                if (loginUser(username)) {
+                    cout << "Masuk berhasil!\n";
+                } else {
+                    cout << "Gagal masuk!\n";
+                }
+                break;
+            case 3:
+                addMovie();
+                break;
+            case 4:
+                viewMovies();
+                break;
+            case 5:
+                if (!username.empty()) {
+                    bookTicket(username);
+                } else {
+                    cout << "Silakan masuk terlebih dahulu!\n";
+                }
+                break;
+            case 6:
+                saveData();
+                // Clean up dynamically allocated memory
+                for (auto &user : users) {
+                    delete user;
+                }
+                for (auto &movie : movies) {
+                    delete movie;
+                }
+                for (auto &booking : bookings) {
+                    delete booking;
+                } 
+                cout << "Terima Kasih" << endl;
+                exit(0);
+            default:
+                cout << "Pilihan tidak valid!\n";
+        }
+    }
+
+    return 0;
+}
+
+void saveData() {
+    ofstream userFile("users.dat"), movieFile("movies.dat"), bookingFile("bookings.dat");
+
+    for (const auto &user : users) {
+        userFile << user->username << " " << user->password << endl;
+    }
+
+    for (const auto &movie : movies) {
+        movieFile << movie->title << " " << movie->schedule << " ";
+        for (const string &seat : movie->seats) {
+            movieFile << seat << " ";
+        }
+        movieFile << endl;
+    }
+
+    for (const auto &booking : bookings) {
+        bookingFile << booking->username << " " << booking->movieTitle << " " << booking->seat << endl;
+    }
+
+    userFile.close();
+    movieFile.close();
+    bookingFile.close();
+}
+
+void loadData() {
+    ifstream userFile("users.dat"), movieFile("movies.dat"), bookingFile("bookings.dat");
+    string username, password, title, schedule, seat, movieTitle;
+
+    while (userFile >> username >> password) {
+        users.push_back(new User(username, password));
+    }
+
+    while (movieFile >> title >> schedule) {
+        Movie *movie = new Movie(title, schedule);
+        while (movieFile >> seat) {
+            movie->seats.push_back(seat);
+        }
+        movies.push_back(movie);
+    }
+
+    while (bookingFile >> username >> movieTitle >> seat) {
+        bookings.push_back(new Booking(username, movieTitle, seat));
+    }
+
+    userFile.close();
+    movieFile.close();
+    bookingFile.close();
+}
+
+bool registerUser() {
+    string username, password;
+    cout << "Masukkan username: ";
+    cin >> username;
+
+    if (findUser(username) != nullptr) {
+        cout << "Username sudah ada!\n";
+        return false;
+    }
+
+    cout << "Masukkan password: ";
+    cin >> password;
+    users.push_back(new User(username, password));
+    cout << "Pengguna terdaftar dengan sukses!\n";
+    return true;
+}
+
+bool loginUser(string &username) {
+    string password;
+    cout << "Masukkan username: ";
+    cin >> username;
+    cout << "Masukkan password: ";
+    cin >> password;
+
+    User* user = findUser(username);
+    if (user != nullptr && user->password == password) {
+        return true;
+    }
+    username.clear();
+    return false;
+}
+
+void addMovie() {
+    string title, schedule;
+    cout << "Masukkan judul film: ";
+    cin.ignore();
+    getline(cin, title);
+    cout << "Masukkan jadwal film: ";
+    getline(cin, schedule);
+
+    movies.push_back(new Movie(title, schedule));
+    cout << "Film berhasil ditambahkan!\n";
+}
+
+void viewMovies() {
+    for (const auto &movie : movies) {
+        cout << "Judul: " << movie->title << ", Jadwal: " << movie->schedule << endl;
+    }
+}
+
+void bookTicket(const string &username) {
+    string movieTitle, seat;
+    viewMovies();
+
+    cout << "Masukkan judul film yang ingin dipesan: ";
+    cin.ignore();
+    getline(cin, movieTitle);
+
+    Movie* movie = findMovie(movieTitle);
+    if (movie == nullptr) {
+        cout << "Film tidak ditemukan!\n";
+        return;
+    }
+
+    cout << "Kursi tersedia: ";
+    for (const string &s : movie->seats) {
+        cout << s << " ";
+    }
+    cout << "\nMasukkan kursi yang ingin dipesan: ";
+    cin >> seat;
+
+    auto it = find(movie->seats.begin(), movie->seats.end(), seat);
+    if (it != movie->seats.end()) {
+        movie->seats.erase(it);
+        bookings.push_back(new Booking(username, movieTitle, seat));
+        cout << "Tiket berhasil dipesan!\n";
+        string ticketInfo = "Pengguna: " + username + ", Film: " + movieTitle + ", Kursi: " + seat;
+        generateBarcode(ticketInfo);
+    } else {
+        cout << "Kursi tidak tersedia!\n";
+    }
+}
+
+void generateBarcode(const string &ticketInfo) {
+    // Simulasi sederhana pembuatan barcode
+    cout << "Membuat barcode untuk: " << ticketInfo << endl;
+    for (char ch : ticketInfo) {
+        cout << static_cast<int>(ch) << " ";
+    }
+    cout << endl;
+}
+
+User* findUser(const string& username) {
+    for (const auto &user : users) {
+        if (user->username == username) {
+            return user;
+        }
+    }
+    return nullptr;
+}
+
+Movie* findMovie(const string& title) {
+    for (const auto &movie : movies) {
+        if (movie->title == title) {
+            return movie;
+        }
+    }
+    return nullptr;
+}
